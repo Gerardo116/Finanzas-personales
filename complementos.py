@@ -1,4 +1,6 @@
-from PyQt5.QtWidgets import QPushButton, QWidget, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QInputDialog, QComboBox, QLineEdit, QDialog
+from PyQt5.QtWidgets import QPushButton, QWidget, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QInputDialog, QComboBox, QLineEdit, QDialog, QDateEdit
+from PyQt5.QtCore import QDate
+from PyQt5.QtGui import QIntValidator, QDoubleValidator
 import backend as be
 import pandas as pd
 import os
@@ -71,7 +73,7 @@ class Titular():
             padding: 5px;
         """)
 
-        self.contenedor.setMaximumHeight(60)
+        self.contenedor.setMaximumHeight(65)
 
         elementos = [self.titulo]
 
@@ -95,6 +97,21 @@ class BotónEstándar():
         self.b_estandar.clicked.connect(funcion)
         self.b_estandar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.b_estandar.setMaximumHeight(40)
+
+        self.b_alt1 = QPushButton(titulo)
+        self.b_alt1.setStyleSheet("""
+            background-color: red;
+            color: white;
+            font-size: 14px;
+            font-family: Calibri;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            padding: 5px;
+        """)
+        self.b_alt1.clicked.connect(funcion)
+        self.b_alt1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.b_alt1.setMaximumHeight(40)
 
 class Cartilla():
     def __init__(self, titulo, saldo):
@@ -134,7 +151,7 @@ class CreaciónCuenta(QDialog):
         self.padre = parent
 
         self.t_cuentas = pd.read_excel(rf'{ruta_validaciones}')
-        self.t_cuentas = self.t_cuentas['tipo_cuenta'].values
+        self.t_cuentas = self.t_cuentas['tipo_cuenta'].dropna().values
 
         self.t_divisas = pd.read_excel(rf'{ruta_validaciones}')
         self.t_divisas = self.t_divisas['divisas'].dropna().values
@@ -175,10 +192,82 @@ class CreaciónCuenta(QDialog):
         for i in elementos:
             self.cc_layout.addWidget(i)
 
+class CreacionRegistro(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.setWindowTitle("Nuevo registro")
+
+        self.ly = QVBoxLayout()
+        self.setLayout(self.ly)
+        self.padre = parent
+        validaciones = pd.read_excel(rf'{ruta_validaciones}')
+
+        self.titulo = Titular('Nuevo registro')
+        self.titulo = self.titulo.contenedor
+
+        self.t_transaccion = QComboBox()
+
+        for i in validaciones['tipo_transaccion'].dropna().values:
+            self.t_transaccion.addItem(i)
+
+        self.monto = QLineEdit()
+        self.monto.setValidator(QDoubleValidator())
+        self.cuenta_invo = QComboBox()
+        nombres = be.traer_nombres()
+
+        for i in nombres:
+            self.cuenta_invo.addItem(i)
+
+        self.c_dest = QLineEdit()
+        self.categorias = QComboBox()
+
+        for i in validaciones['categorias'].dropna().values:
+            self.categorias.addItem(i)
+
+        self.cuenta_dest = QComboBox()
+        nombres = be.traer_nombres()
+
+        for i in nombres:
+            self.cuenta_dest.addItem(i)
+
+        self.nota = QLineEdit()
+
+        self.fecha = QDateEdit()
+        self.fecha.setCalendarPopup(True)
+        self.fecha.setDate(QDate.currentDate())
+
+        self.tit_transaccion = QLabel('Elige el tipo de transacción')
+        self.tit_monto = QLabel('Introduce el monto')
+        self.tit_cuenta = QLabel('Elige la cuenta de origen')
+        self.tit_cuenta_dest = QLabel('Elige la cuenta de destino')
+        self.tit_categoria = QLabel('Elige la categoría')
+        self.tit_nota = QLabel('Agrega una nota')
+        self.nota = QLineEdit()
+        self.tit_fecha = QLabel('Elige la fecha de transacción')
+
+        self.boton_agregar_registro = BotónEstándar('Agregar Registro',lambda: be.crear_registro(self.padre,self))
+        self.boton_agregar_registro = self.boton_agregar_registro.b_estandar
 
 
+        elementos = [
+            self.titulo, 
+            self.tit_transaccion, 
+            self.t_transaccion,
+            self.tit_monto, 
+            self.monto, 
+            self.tit_cuenta,
+            self.cuenta_invo,
+            self.tit_cuenta_dest, 
+            self.cuenta_dest, 
+            self.tit_categoria, 
+            self.categorias,
+            self.tit_nota,
+            self.nota, self.
+            tit_fecha, 
+            self.fecha, 
+            self.boton_agregar_registro,
+            ]
 
-
-
-
-
+        for i in elementos:
+            self.ly.addWidget(i)

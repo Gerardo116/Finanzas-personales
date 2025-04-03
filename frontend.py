@@ -8,7 +8,8 @@ class MainWindow(QMainWindow):
 
         #CONSIDERACIONES DE LA VENTANA PRINCIPAL
         self.setWindowTitle("Gestión de finanzas personales") #Crea la ventana principal
-        self.setGeometry(100, 100, 700, 500) #Valores iniciales del tamaño de la pestaña sin maximizar
+        self.adjustSize()
+        self.setMinimumSize(1000,500) #Valores iniciales del tamaño de la pestaña sin maximizar
         self.widget_principal = QStackedWidget() #Widget que permite intercambiar entre widgets
         self.setCentralWidget(self.widget_principal) #Hace que el widget de las pestañas sea el principal
 
@@ -28,6 +29,7 @@ class MainWindow(QMainWindow):
 class Home(QWidget):
     def __init__(self, widget_principal):
         super().__init__()
+
 
         #WIDGET GENERAL DE LA VENTANA
         self.home_ly = QVBoxLayout()
@@ -64,10 +66,29 @@ class Home(QWidget):
         instancia = cp.BotónEstándar('Agregar cuenta',lambda:be.agregar_cuenta(self))
         self.b_estandar = instancia.b_estandar
 
+        #Mantenedor de cuentas
+        be.cargar_saldos(self)
+
         #ZONA ANALISIS DE INFO
         self.z_analisis = QWidget()
         self.z_analisis_ly = QVBoxLayout()
         self.z_analisis.setLayout(self.z_analisis_ly)
+
+        self.registros = QTableWidget()
+        self.registros.verticalHeader().setVisible(False)
+        self.registros.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.registros.resizeColumnsToContents()
+        be.actualizar_tabla_registros(self)
+        self.b_nuevo_registro = cp.BotónEstándar('Nuevo registro', lambda: be.nuevo_registro(self))
+        self.b_nuevo_registro = self.b_nuevo_registro.b_estandar
+
+        self.boton_eliminar_registro = cp.BotónEstándar('Eliminar Registro', lambda: be.eliminar_registros(self))
+        self.boton_eliminar_registro = self.boton_eliminar_registro.b_alt1
+
+        elementos_analisis = [self.registros,self.b_nuevo_registro,self.boton_eliminar_registro]
+
+        for i in elementos_analisis:
+            self.z_analisis_ly.addWidget(i)
 
         #Agregamos elementos a zona de cuentas
         self.z_cuentas_ly.addStretch()
