@@ -17,8 +17,8 @@ class MainWindow(QMainWindow):
         #AGREGAR LAS PÁGINAS CREADAS
         #Instanciar las páginas
         self.home = Home(self.widget_principal)
-        self.notas = GestionNotas(self.widget_principal)
-        self.paginas = [self.home, self.notas] #Colocarlas en la lista para bucle posterior
+        self.proyectado = Proyectado(self.widget_principal,self.home)
+        self.paginas = [self.home, self.proyectado] #Colocarlas en la lista para bucle posterior
 
         #Agregarlas a QstackedWidget
         for pagina in self.paginas:
@@ -38,6 +38,16 @@ class Home(QWidget):
         #TITUTLO DE LA VENTANA
         self.titular = cp.Titular("Asistente de finanzas")
         self.titular = self.titular.contenedor
+
+        #ZONA DE BOTONES SUPERIORES
+        self.z_otros = QWidget()
+        self.z_otros.setMaximumHeight(70)
+        self.z_otros_ly = QHBoxLayout()
+        self.z_otros.setLayout(self.z_otros_ly)
+
+        self.b_proyectado = cp.BotónEstándar('Proyectados',lambda: be.ir_proyectado(widget_principal)).b_alt2
+        self.b_analiticas = cp.BotónEstándar('Analíticas',lambda: be.ir_proyectado(widget_principal)).b_alt2
+
 
         #CONTNEEDOR DE LAS DOS ZONAS EN VENTANA
         self.z_principal = QWidget()
@@ -85,6 +95,14 @@ class Home(QWidget):
         self.boton_eliminar_registro = cp.BotónEstándar('Eliminar Registro', lambda: be.eliminar_registros(self))
         self.boton_eliminar_registro = self.boton_eliminar_registro.b_alt1
 
+
+        #Agregamos elementos a la zona de botones superiores
+        elementos_superiores = [self.b_proyectado, self.b_analiticas]
+
+        for i in elementos_superiores:
+            self.z_otros_ly.addWidget(i)
+
+        #Agregamos elementos a la zona de análisis
         elementos_analisis = [self.registros,self.b_nuevo_registro,self.boton_eliminar_registro]
 
         for i in elementos_analisis:
@@ -101,15 +119,37 @@ class Home(QWidget):
             self.z_principal_ly.addWidget(i)
 
         #Agregamos el título y contenedor
-        elementos_n1 = [self.titular, self.z_principal]
+        elementos_n1 = [self.titular, self.z_otros, self.z_principal]
 
         for i in elementos_n1:
             self.home_ly.addWidget(i)
 
 
 
-class GestionNotas (QWidget):
-    def __init__(self, widget_principal):
+class Proyectado(QWidget):
+    def __init__(self, widget_principal,widget_home):
         super().__init__()
+        self.widget_home = widget_home
+        self.widget_principal = widget_principal
+        self.ly = QVBoxLayout()
+        self.setLayout(self.ly)
+
+        self.navegacion = cp.Barra_Nav('Ingresos/Egresos Proyectados', self.widget_principal)
+        self.tabla_proyectados = QTableWidget()
+        self.tabla_proyectados.verticalHeader().setVisible(False)
+        self.tabla_proyectados.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.tabla_proyectados.resizeColumnsToContents()
+        be.actualizar_tabla_proyect(self)
+        self.b_registro = cp.BotónEstándar('Nuevo Registro',lambda: be.nuevo_registro_proyect(self)).b_estandar
+        self.b_eliminar = cp.BotónEstándar('Eliminar Registro',lambda: be.eliminar_registros_proyect(self)).b_alt1
+        self.b_cometer_registros = cp.BotónEstándar('Cometer registros',lambda: be.cometer_registros(self.widget_home,self)).b_alt3
+        self.b_cometer_registros_elegidos = cp.BotónEstándar('Cometer registros (Periodo elegido)',be.prueba).b_alt3
+
+
+
+        elementos = [self.navegacion, self.tabla_proyectados,self.b_registro, self.b_eliminar, self.b_cometer_registros, self.b_cometer_registros_elegidos]
+
+        for i in elementos:
+            self.ly.addWidget(i)
 
        

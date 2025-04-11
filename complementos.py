@@ -8,20 +8,21 @@ import os
 ruta_base = os.path.dirname(os.path.abspath(__file__))
 ruta_validaciones = os.path.join(ruta_base, "recursos", "validaciones.xlsx")
 
-class Barra_Nav():
+class Barra_Nav(QWidget):
     def __init__(self, titulo, elemento_stacked):
+        super().__init__()
 
         self.widget_principal = elemento_stacked
 
-        self.contenedor = QWidget()
-        self.contenedor_layout = QHBoxLayout()
-        self.contenedor.setLayout(self.contenedor_layout)
+        # Usa el layout directamente en self
+        self.layout = QHBoxLayout()
+        self.setLayout(self.layout)
 
         self.titulo = QLabel(titulo)
         self.titulo.setStyleSheet("""
             background-color: black;
             color: white;
-            font-size: 35px;
+            font-size: 28px;
             font-family: Arial;
             font-weight: bold;
             letter-spacing: 0.5px;
@@ -40,19 +41,16 @@ class Barra_Nav():
             border-radius: 8px;
             padding: 5px;
         """)
-
         self.boton_atras.setMaximumWidth(70)
         self.boton_atras.setMaximumHeight(50)
         self.boton_atras.clicked.connect(self.ir_atras)
 
-        elementos = [self.boton_atras, self.titulo]
+        for i in [self.boton_atras, self.titulo]:
+            self.layout.addWidget(i)
 
-        for i in elementos:
-            self.contenedor_layout.addWidget(i)
-    
     def ir_atras(self):
-        pg_actual = self.widget_principal.currentIndex()
-        self.widget_principal.setCurrentIndex(pg_actual-1)
+        self.widget_principal.setCurrentIndex(0)
+
 
 class Titular():
     def __init__(self, titulo):
@@ -66,7 +64,7 @@ class Titular():
             background-color: #003366;
             color: white;
             font-size: 35px;
-            font-family: Arial;
+            font-family: Segoe UI;
             font-weight: bold;
             letter-spacing: 0.5px;
             border-radius: 8px;
@@ -83,12 +81,13 @@ class Titular():
 class BotónEstándar():
     def __init__(self, titulo, funcion):
 
-        self.b_estandar = QPushButton(titulo)
+        self.titulo = titulo
+        self.b_estandar = QPushButton(self.titulo)
         self.b_estandar.setStyleSheet("""
             background-color: #006400;
             color: white;
             font-size: 14px;
-            font-family: Calibri;
+            font-family: Verdana;
             font-weight: bold;
             letter-spacing: 0.5px;
             border-radius: 8px;
@@ -98,12 +97,12 @@ class BotónEstándar():
         self.b_estandar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.b_estandar.setMaximumHeight(40)
 
-        self.b_alt1 = QPushButton(titulo)
+        self.b_alt1 = QPushButton(self.titulo)
         self.b_alt1.setStyleSheet("""
             background-color: red;
             color: white;
             font-size: 14px;
-            font-family: Calibri;
+            font-family: Verdana;
             font-weight: bold;
             letter-spacing: 0.5px;
             border-radius: 8px;
@@ -112,6 +111,36 @@ class BotónEstándar():
         self.b_alt1.clicked.connect(funcion)
         self.b_alt1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.b_alt1.setMaximumHeight(40)
+
+        self.b_alt2 = QPushButton(titulo)
+        self.b_alt2.setStyleSheet("""
+            background-color: black;
+            color: white;
+            font-size: 14px;
+            font-family: Verdana;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            padding: 5px;
+        """)
+        self.b_alt2.clicked.connect(funcion)
+        self.b_alt2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+
+        self.b_alt3 = QPushButton(self.titulo)
+        self.b_alt3.setStyleSheet("""
+            background-color: black;
+            color: white;
+            font-size: 14px;
+            font-family: Verdana;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            padding: 5px;
+        """)
+        self.b_alt3.clicked.connect(funcion)
+        self.b_alt3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.b_alt3.setMaximumHeight(40)
 
 class Cartilla():
     def __init__(self, titulo, saldo):
@@ -246,8 +275,87 @@ class CreacionRegistro(QDialog):
         self.nota = QLineEdit()
         self.tit_fecha = QLabel('Elige la fecha de transacción')
 
-        self.boton_agregar_registro = BotónEstándar('Agregar Registro',lambda: be.crear_registro(self.padre,self))
-        self.boton_agregar_registro = self.boton_agregar_registro.b_estandar
+        self.boton_agregar_registro = BotónEstándar('Agregar Registro',lambda: be.crear_registro(self.padre,self)).b_estandar
+
+
+        elementos = [
+            self.titulo, 
+            self.tit_transaccion, 
+            self.t_transaccion,
+            self.tit_monto, 
+            self.monto, 
+            self.tit_cuenta,
+            self.cuenta_invo,
+            self.tit_cuenta_dest, 
+            self.cuenta_dest, 
+            self.tit_categoria, 
+            self.categorias,
+            self.tit_nota,
+            self.nota, self.
+            tit_fecha, 
+            self.fecha, 
+            self.boton_agregar_registro,
+            ]
+
+        for i in elementos:
+            self.ly.addWidget(i)
+
+
+class CreacionRegistroProyect(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.setWindowTitle("Nuevo registro")
+
+        self.ly = QVBoxLayout()
+        self.setLayout(self.ly)
+        self.padre = parent
+        validaciones = pd.read_excel(rf'{ruta_validaciones}')
+
+        self.titulo = Titular('Nuevo registro')
+        self.titulo = self.titulo.contenedor
+
+        self.t_transaccion = QComboBox()
+
+        for i in validaciones['tipo_transaccion'].dropna().values:
+            self.t_transaccion.addItem(i)
+
+        self.monto = QLineEdit()
+        self.monto.setValidator(QDoubleValidator())
+        self.cuenta_invo = QComboBox()
+        nombres = be.traer_nombres()
+
+        for i in nombres:
+            self.cuenta_invo.addItem(i)
+
+        self.c_dest = QLineEdit()
+        self.categorias = QComboBox()
+
+        for i in validaciones['categorias'].dropna().values:
+            self.categorias.addItem(i)
+
+        self.cuenta_dest = QComboBox()
+        nombres = be.traer_nombres()
+
+        for i in nombres:
+            self.cuenta_dest.addItem(i)
+
+        self.nota = QLineEdit()
+
+        self.fecha = QDateEdit()
+        self.fecha.setCalendarPopup(True)
+        self.fecha.setDate(QDate.currentDate())
+
+        self.tit_transaccion = QLabel('Elige el tipo de transacción')
+        self.tit_monto = QLabel('Introduce el monto')
+        self.tit_cuenta = QLabel('Elige la cuenta de origen')
+        self.tit_cuenta_dest = QLabel('Elige la cuenta de destino')
+        self.tit_categoria = QLabel('Elige la categoría')
+        self.tit_nota = QLabel('Agrega una nota')
+        self.nota = QLineEdit()
+        self.tit_fecha = QLabel('Elige la fecha de transacción')
+
+        self.boton_agregar_registro = BotónEstándar('Agregar Registro',lambda: be.crear_registro_proyec(self.padre,self)).b_estandar
 
 
         elementos = [
